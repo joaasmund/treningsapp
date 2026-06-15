@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Treningsplan</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;max-width:420px;margin:0 auto;padding-bottom:4rem;}
+.header{background:#fff;padding:1.1rem 1rem 0.9rem;border-bottom:1px solid #e8e8e4;}
+.greeting{font-size:21px;font-weight:600;}
+.subgreet{font-size:13px;color:#888;margin-top:2px;}
+.date-chip{display:inline-block;font-size:11px;background:#f0f0ea;color:#666;border-radius:8px;padding:3px 10px;margin-top:7px;}
+.nav-tabs{display:flex;background:#fff;border-bottom:1px solid #e8e8e4;}
+.nav-tab{flex:1;padding:10px 4px;text-align:center;font-size:13px;font-weight:500;color:#999;border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.nav-tab.active{color:#185FA5;border-bottom-color:#378ADD;}
+.page{display:none;}.page.active{display:block;}
+.sec-label{font-size:11px;font-weight:600;color:#999;letter-spacing:.05em;text-transform:uppercase;padding:1rem 1rem 0.4rem;}
+.card{background:#fff;border-radius:14px;margin:0 1rem;border:1px solid #e8e8e4;overflow:hidden;}
+.week-row{display:flex;gap:5px;padding:0 1rem;}
+.week-day{flex:1;text-align:center;cursor:pointer;}
+.wd-label{font-size:10px;color:#999;margin-bottom:4px;}
+.wd-dot{width:30px;height:30px;border-radius:50%;border:1px solid #ddd;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:10px;color:#999;transition:all .15s;}
+.wd-dot.today{border-color:#378ADD;color:#185FA5;font-weight:600;background:#E6F1FB;}
+.wd-dot.done{background:#1D9E75;border-color:#1D9E75;color:#fff;}
+.today-top{padding:1rem;border-bottom:1px solid #f0f0ea;}
+.badges{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;}
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:7px;}
+.b-push{background:#E6F1FB;color:#0C447C;}
+.b-pull{background:#EAF3DE;color:#27500A;}
+.b-legs{background:#FAEEDA;color:#633806;}
+.b-cardio{background:#FCEBEB;color:#791F1F;}
+.b-prio{background:#EEEDFE;color:#3C3489;}
+.b-rest{background:#f0f0ea;color:#555;}
+.today-title{font-size:17px;font-weight:600;}
+.today-sub{font-size:13px;color:#888;margin-top:2px;}
+.time-bar{display:flex;gap:12px;padding:8px 1rem;background:#f9f9f7;border-bottom:1px solid #f0f0ea;}
+.time-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#666;}
+.time-icon{font-size:14px;}
+.ex-row{border-bottom:1px solid #f5f5f0;}
+.ex-row:last-child{border-bottom:none;}
+.ex-main{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 1rem;}
+.ex-left{display:flex;align-items:flex-start;gap:8px;flex:1;}
+.prio-dot{width:6px;height:6px;border-radius:50%;background:#1D9E75;flex-shrink:0;margin-top:5px;}
+.no-dot{width:6px;flex-shrink:0;}
+.ex-info{flex:1;}
+.ex-name{font-size:14px;font-weight:500;}
+.ex-meta{display:flex;gap:8px;margin-top:3px;flex-wrap:wrap;}
+.ex-sets{font-size:12px;color:#aaa;}
+.rpe-badge{font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:#FAEEDA;color:#633806;}
+.rpe-7{background:#EAF3DE;color:#27500A;}
+.rpe-8{background:#FAEEDA;color:#633806;}
+.rpe-9{background:#FCEBEB;color:#791F1F;}
+.pause-badge{font-size:11px;padding:2px 7px;border-radius:6px;background:#f0f0ea;color:#666;}
+.ex-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px;}
+.log-btn{font-size:12px;color:#378ADD;background:transparent;border:1px solid #B5D4F4;border-radius:7px;padding:3px 8px;cursor:pointer;}
+.chk{width:24px;height:24px;border-radius:50%;border:1.5px solid #ccc;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;transition:all .15s;}
+.chk.done{background:#1D9E75;border-color:#1D9E75;color:#fff;}
+.prev-log{font-size:11px;color:#aaa;margin-top:2px;}
+.prev-log.today-log{color:#1D9E75;}
+.log-panel{display:none;padding:0 1rem 12px;background:#f9f9f7;}
+.log-panel.open{display:block;}
+.log-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.log-set-num{font-size:12px;color:#aaa;width:50px;flex-shrink:0;}
+.log-input{flex:1;padding:7px 8px;border:1px solid #e0e0da;border-radius:8px;font-size:14px;background:#fff;}
+.log-label{font-size:12px;color:#aaa;white-space:nowrap;}
+.log-save-btn{width:100%;margin-top:8px;padding:8px;background:#1D9E75;color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;}
+.prog-wrap{padding:0 1rem;}
+.prog-row{display:flex;justify-content:space-between;font-size:13px;color:#888;margin-bottom:6px;}
+.prog-track{height:5px;background:#eee;border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;background:#1D9E75;border-radius:3px;transition:width .3s;}
+.macro-row{display:flex;gap:8px;padding:0 1rem;}
+.m-card{flex:1;background:#fff;border-radius:10px;padding:10px 6px;text-align:center;border:1px solid #e8e8e4;}
+.m-val{font-size:16px;font-weight:600;}
+.m-lbl{font-size:10px;color:#999;margin-top:2px;}
+.evening-card{padding:1rem;display:flex;align-items:center;justify-content:space-between;}
+.ev-left{display:flex;align-items:center;gap:10px;}
+.ev-icon{font-size:22px;}
+.ev-title{font-size:14px;font-weight:600;}
+.ev-sub{font-size:12px;color:#888;margin-top:1px;}
+.toggle{width:42px;height:24px;border-radius:12px;background:#ccc;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:#1D9E75;}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;}
+.toggle.on .toggle-thumb{left:21px;}
+.tip-card{padding:1rem;}
+.tip-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.tip-icon{font-size:20px;}
+.tip-title{font-size:14px;font-weight:600;}
+.tip-body{font-size:13px;color:#555;line-height:1.6;}
+.tip-nav{display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.tip-dots{display:flex;gap:5px;}
+.tip-dot{width:6px;height:6px;border-radius:50%;background:#ddd;}
+.tip-dot.active{background:#378ADD;}
+.tip-arrows{display:flex;gap:8px;}
+.tip-btn{background:#f5f5f0;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-size:15px;color:#555;}
+.rpe-legend{margin:0 1rem;background:#fff;border-radius:14px;border:1px solid #e8e8e4;padding:1rem;}
+.rpe-legend-title{font-size:13px;font-weight:600;margin-bottom:8px;}
+.rpe-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:#555;border-bottom:1px solid #f5f5f0;}
+.rpe-row:last-child{border-bottom:none;}
+.rpe-num{font-size:12px;font-weight:700;width:32px;flex-shrink:0;}
+.unlock-card{padding:1rem;}
+.unlock-title{font-size:14px;font-weight:600;margin-bottom:10px;}
+.unlock-item{font-size:13px;color:#555;padding:8px 0;border-bottom:1px solid #f5f5f0;display:flex;align-items:flex-start;gap:10px;line-height:1.5;}
+.unlock-item:last-child{border-bottom:none;padding-bottom:0;}
+.unum{font-size:11px;font-weight:700;color:#0C447C;background:#E6F1FB;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.day-select-row{display:flex;gap:6px;flex-wrap:wrap;padding:0 1rem;}
+.day-sel-btn{padding:7px 12px;border-radius:9px;border:1px solid #e0e0da;background:#fff;font-size:13px;cursor:pointer;color:#555;}
+.day-sel-btn.active{background:#185FA5;color:#fff;border-color:#185FA5;}
+.graph-card{padding:1rem;}
+.graph-ex-select{width:100%;padding:8px 10px;border:1px solid #e0e0da;border-radius:9px;font-size:14px;background:#fff;margin-bottom:12px;}
+.graph-area{height:160px;position:relative;margin-bottom:8px;}
+canvas{width:100%!important;height:160px!important;}
+.graph-empty{text-align:center;color:#aaa;font-size:13px;padding:40px 0;}
+.log-history{margin-top:8px;}
+.log-hist-row{display:flex;justify-content:space-between;font-size:13px;color:#555;padding:5px 0;border-bottom:1px solid #f0f0ea;}
+.log-hist-row:last-child{border-bottom:none;}
+.log-hist-date{color:#aaa;font-size:12px;}
+
+.meal-block{padding:1rem;cursor:pointer;}
+.meal-header{display:flex;justify-content:space-between;align-items:center;}
+.meal-left{display:flex;align-items:center;gap:12px;}
+.meal-time{font-size:12px;font-weight:700;color:#185FA5;background:#E6F1FB;padding:4px 8px;border-radius:7px;white-space:nowrap;}
+.meal-title{font-size:14px;font-weight:600;margin-bottom:2px;}
+.meal-kcal{font-size:12px;color:#888;}
+.meal-arrow{font-size:20px;color:#aaa;transition:transform .2s;}
+.meal-arrow.open{transform:rotate(90deg);}
+.meal-detail{display:none;padding:0 1rem 12px;border-top:1px solid #f5f5f0;}
+.meal-detail.open{display:block;}
+.meal-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f5f0;font-size:13px;}
+.meal-item:last-of-type{border-bottom:none;}
+.food-name{color:#333;}
+.food-amount{color:#888;font-weight:500;}
+.meal-tip{margin-top:8px;font-size:12px;color:#888;background:#f9f9f7;padding:8px 10px;border-radius:8px;line-height:1.5;border-left:2px solid #378ADD;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="greeting" id="greeting">God morgen!</div>
+  <div class="subgreet">Her er planen din</div>
+  <div class="date-chip" id="datechip"></div>
+</div>
+
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showPage('today')">I dag</button>
+  <button class="nav-tab" onclick="showPage('week')">Ukeplan</button>
+  <button class="nav-tab" onclick="showPage('graph')">Fremgang</button>
+  <button class="nav-tab" onclick="showPage('kosthold')">Kosthold</button>
+  <button class="nav-tab" onclick="showPage('tips')">Tips</button>
+</div>
+
+<div class="page active" id="page-today">
+  <div class="sec-label">Uken din</div>
+  <div class="week-row" id="weekrow"></div>
+  <div class="sec-label">Dagens økt</div>
+  <div class="card">
+    <div class="today-top">
+      <div class="badges" id="badges"></div>
+      <div class="today-title" id="today-title"></div>
+      <div class="today-sub" id="today-sub"></div>
+    </div>
+    <div class="time-bar">
+      <div class="time-item"><span class="time-icon">⏱</span><span id="time-total">~55 min</span></div>
+      <div class="time-item"><span class="time-icon">🔥</span><span id="time-warmup">5 min oppvarming</span></div>
+      <div class="time-item"><span class="time-icon">💤</span><span id="time-pause"></span></div>
+    </div>
+    <div id="ex-list"></div>
+  </div>
+  <div class="sec-label">Fremgang</div>
+  <div class="prog-wrap">
+    <div class="prog-row"><span>Øvelser fullført</span><span id="prog-text">0 / 0</span></div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="sec-label">Makromål</div>
+  <div class="macro-row">
+    <div class="m-card"><div class="m-val">2900</div><div class="m-lbl">kcal</div></div>
+    <div class="m-card"><div class="m-val">180g</div><div class="m-lbl">protein</div></div>
+    <div class="m-card"><div class="m-val">320g</div><div class="m-lbl">karbo</div></div>
+    <div class="m-card"><div class="m-val">85g</div><div class="m-lbl">fett</div></div>
+  </div>
+  <div class="sec-label">Kveldscardio</div>
+  <div class="card">
+    <div class="evening-card">
+      <div class="ev-left">
+        <span class="ev-icon">🏃</span>
+        <div>
+          <div class="ev-title">Lett jogg – 25–35 min</div>
+          <div class="ev-sub" id="ev-sub">Valgfritt i dag</div>
+        </div>
+      </div>
+      <button class="toggle" id="cardio-toggle" onclick="toggleCardio()"><div class="toggle-thumb"></div></button>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-week">
+  <div class="sec-label">Velg dag</div>
+  <div class="day-select-row" id="day-select-row"></div>
+  <div class="sec-label" id="week-day-label"></div>
+  <div class="card" id="week-day-card"></div>
+</div>
+
+
+<div class="page" id="page-kosthold">
+  <div class="sec-label">Makromål per dag</div>
+  <div class="macro-row">
+    <div class="m-card"><div class="m-val">2900</div><div class="m-lbl">kcal</div></div>
+    <div class="m-card"><div class="m-val">180g</div><div class="m-lbl">protein</div></div>
+    <div class="m-card"><div class="m-val">320g</div><div class="m-lbl">karbo</div></div>
+    <div class="m-card"><div class="m-val">85g</div><div class="m-lbl">fett</div></div>
+  </div>
+
+  <div class="sec-label">Dine 5 måltider</div>
+
+  <div class="card" style="margin-bottom:10px;">
+    <div class="meal-block" onclick="toggleMeal('m1')">
+      <div class="meal-header">
+        <div class="meal-left">
+          <span class="meal-time">06:00</span>
+          <div>
+            <div class="meal-title">Carbload pre-workout</div>
+            <div class="meal-kcal">~300 kcal · 8g P · 55g K · 5g F</div>
+          </div>
+        </div>
+        <span class="meal-arrow" id="arr-m1">›</span>
+      </div>
+    </div>
+    <div class="meal-detail" id="m1">
+      <div class="meal-item"><span class="food-name">Havregryn</span><span class="food-amount">70g</span></div>
+      <div class="meal-item"><span class="food-name">Melk (lettmelk)</span><span class="food-amount">1,5 dl</span></div>
+      <div class="meal-item"><span class="food-name">Banan</span><span class="food-amount">1 stk</span></div>
+      <div class="meal-tip">Lett, raskt fordøyelig. Ikke spis for mye – du skal trene om 20–30 min.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:10px;">
+    <div class="meal-block" onclick="toggleMeal('m2')">
+      <div class="meal-header">
+        <div class="meal-left">
+          <span class="meal-time">08:00</span>
+          <div>
+            <div class="meal-title">Frokost post-workout</div>
+            <div class="meal-kcal">~650 kcal · 50g P · 65g K · 18g F</div>
+          </div>
+        </div>
+        <span class="meal-arrow" id="arr-m2">›</span>
+      </div>
+    </div>
+    <div class="meal-detail" id="m2">
+      <div class="meal-item"><span class="food-name">Egg (hele)</span><span class="food-amount">4 stk</span></div>
+      <div class="meal-item"><span class="food-name">Cottage cheese</span><span class="food-amount">150g</span></div>
+      <div class="meal-item"><span class="food-name">Fullkornsbrød</span><span class="food-amount">2 skiver</span></div>
+      <div class="meal-item"><span class="food-name">Appelsin eller frukt</span><span class="food-amount">1 stk</span></div>
+      <div class="meal-tip">Viktigste måltid etter økt. Protein + karbo innen 60 min etter trening.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:10px;">
+    <div class="meal-block" onclick="toggleMeal('m3')">
+      <div class="meal-header">
+        <div class="meal-left">
+          <span class="meal-time">12:00</span>
+          <div>
+            <div class="meal-title">Lunsj</div>
+            <div class="meal-kcal">~700 kcal · 50g P · 75g K · 18g F</div>
+          </div>
+        </div>
+        <span class="meal-arrow" id="arr-m3">›</span>
+      </div>
+    </div>
+    <div class="meal-detail" id="m3">
+      <div class="meal-item"><span class="food-name">Kyllingfilet eller torsk</span><span class="food-amount">180g</span></div>
+      <div class="meal-item"><span class="food-name">Ris (kokt vekt)</span><span class="food-amount">200g</span></div>
+      <div class="meal-item"><span class="food-name">Grønnsaker (brokkoli, paprika)</span><span class="food-amount">150g</span></div>
+      <div class="meal-item"><span class="food-name">Olivenolje</span><span class="food-amount">1 ss</span></div>
+      <div class="meal-tip">Rask å forberede kvelden før. Meal prep sparer deg for dårlige valg på jobb.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:10px;">
+    <div class="meal-block" onclick="toggleMeal('m4')">
+      <div class="meal-header">
+        <div class="meal-left">
+          <span class="meal-time">17:30</span>
+          <div>
+            <div class="meal-title">Middag</div>
+            <div class="meal-kcal">~750 kcal · 45g P · 75g K · 22g F</div>
+          </div>
+        </div>
+        <span class="meal-arrow" id="arr-m4">›</span>
+      </div>
+    </div>
+    <div class="meal-detail" id="m4">
+      <div class="meal-item"><span class="food-name">Laks, biff eller kylling</span><span class="food-amount">200g</span></div>
+      <div class="meal-item"><span class="food-name">Søtpotet eller vanlig potet</span><span class="food-amount">250g</span></div>
+      <div class="meal-item"><span class="food-name">Grønnsaker</span><span class="food-amount">150g</span></div>
+      <div class="meal-item"><span class="food-name">Smør eller olivenolje</span><span class="food-amount">1 ss</span></div>
+      <div class="meal-tip">Kveldene med jogg: spis 30–45 min før du løper, ikke rett etter.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:10px;">
+    <div class="meal-block" onclick="toggleMeal('m5')">
+      <div class="meal-header">
+        <div class="meal-left">
+          <span class="meal-time">21:00</span>
+          <div>
+            <div class="meal-title">Kveldsmat</div>
+            <div class="meal-kcal">~500 kcal · 42g P · 50g K · 12g F</div>
+          </div>
+        </div>
+        <span class="meal-arrow" id="arr-m5">›</span>
+      </div>
+    </div>
+    <div class="meal-detail" id="m5">
+      <div class="meal-item"><span class="food-name">Gresk yoghurt (10% fett)</span><span class="food-amount">250g</span></div>
+      <div class="meal-item"><span class="food-name">Cottage cheese</span><span class="food-amount">100g</span></div>
+      <div class="meal-item"><span class="food-name">Müsli eller havregryn</span><span class="food-amount">50g</span></div>
+      <div class="meal-item"><span class="food-name">Bær eller banan</span><span class="food-amount">100g</span></div>
+      <div class="meal-tip">Kasein og cottage cheese er saktevirkende proteiner – ideelt før søvn. Viktigste protein-timing på dagen.</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Hviledager vs. treningsdager</div>
+  <div class="card" style="overflow:hidden;">
+    <div style="display:flex;border-bottom:1px solid #f0f0ea;">
+      <div style="flex:1;padding:12px;border-right:1px solid #f0f0ea;">
+        <div style="font-size:12px;font-weight:600;color:#185FA5;margin-bottom:6px;">Treningsdag</div>
+        <div style="font-size:13px;color:#555;line-height:1.7;">2900 kcal<br>320g karbo<br>180g protein<br>85g fett</div>
+      </div>
+      <div style="flex:1;padding:12px;">
+        <div style="font-size:12px;font-weight:600;color:#633806;margin-bottom:6px;">Hviledag</div>
+        <div style="font-size:13px;color:#555;line-height:1.7;">2600 kcal<br>240g karbo<br>180g protein<br>85g fett</div>
+      </div>
+    </div>
+    <div style="padding:10px 1rem;font-size:12px;color:#888;line-height:1.5;">Kutt 300 kcal på hviledager ved å redusere karbo – ikke protein eller fett. Karbo er drivstoff for trening, ikke hvile.</div>
+  </div>
+
+  <div class="sec-label">Smarte vaner</div>
+  <div class="card">
+    <div style="padding:1rem;">
+      <div class="unlock-item"><span class="unum">1</span>Meal prep søndag kveld: kok ris og kylling til 3 dager. Sparer deg fra dårlige lunsjvalg og sikrer at du treffer makroene.</div>
+      <div class="unlock-item"><span class="unum">2</span>Kreatin 5g hver morgen i carbloaden. Tas med mat, ikke på tom mage.</div>
+      <div class="unlock-item"><span class="unum">3</span>Protein er det viktigste. Treffer du 180g protein men ikke nøyaktig kalorier, er du fortsatt på rett spor.</div>
+      <div class="unlock-item"><span class="unum">4</span>Dager med kveldsjogger: legg til en ekstra banan eller 50g ris til middag. Ca. 150 kcal ekstra er nok.</div>
+      <div class="unlock-item" style="border:none;padding-bottom:0;"><span class="unum">5</span>Drikk 2–3 liter vann per dag. Dehydrering reduserer styrke med opptil 10% – undervurdert av de fleste.</div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-graph">
+  <div class="sec-label">Fremgang per øvelse</div>
+  <div class="card">
+    <div class="graph-card">
+      <select class="graph-ex-select" id="graph-ex-select" onchange="renderGraph()"></select>
+      <div class="graph-area"><canvas id="myChart"></canvas></div>
+      <div class="log-history" id="log-history"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-tips">
+  <div class="sec-label">RPE-guide</div>
+  <div class="rpe-legend">
+    <div class="rpe-legend-title">Hva betyr RPE?</div>
+    <div class="rpe-row"><span class="rpe-num rpe-7" style="background:#EAF3DE;color:#27500A;padding:2px 6px;border-radius:5px;">7</span>3 reps igjen i tanken – kontrollert, god teknikk</div>
+    <div class="rpe-row"><span class="rpe-num rpe-8" style="background:#FAEEDA;color:#633806;padding:2px 6px;border-radius:5px;">8</span>2 reps igjen – utfordrende men komfortabelt</div>
+    <div class="rpe-row"><span class="rpe-num rpe-9" style="background:#FCEBEB;color:#791F1F;padding:2px 6px;border-radius:5px;">9</span>1 rep igjen – tett på maks, kun tunge sett</div>
+  </div>
+  <div class="sec-label">Dagens tips</div>
+  <div class="card">
+    <div class="tip-card">
+      <div class="tip-header"><span class="tip-icon" id="tip-icon"></span><span class="tip-title" id="tip-title"></span></div>
+      <div class="tip-body" id="tip-body"></div>
+      <div class="tip-nav">
+        <div class="tip-dots" id="tip-dots"></div>
+        <div class="tip-arrows">
+          <button class="tip-btn" onclick="prevTip()">←</button>
+          <button class="tip-btn" onclick="nextTip()">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sec-label">Hva mangler for maks potensial?</div>
+  <div class="card">
+    <div class="unlock-card">
+      <div class="unlock-title">🔓 Slik låser du opp neste nivå</div>
+      <div class="unlock-item"><span class="unum">1</span>Track mat i 4 uker. MyFitnessPal, 5 min/dag. Du vil bli overrasket over hvor mange kalorier som mangler.</div>
+      <div class="unlock-item"><span class="unum">2</span>Logg løftene her. Uten tall vet du ikke om du faktisk blir sterkere fra uke til uke.</div>
+      <div class="unlock-item"><span class="unum">3</span>Kreatin 5g/dag. Billig, enkelt, best dokumenterte tilskuddet som finnes.</div>
+      <div class="unlock-item"><span class="unum">4</span>Fremgangsbilder annenhver uke. Samme lys, samme pose, morgen fastende.</div>
+      <div class="unlock-item"><span class="unum">5</span>Deload etter uke 7. Halvert volum én uke – da vokser musklene faktisk.</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const DAYS=['Søn','Man','Tir','Ons','Tor','Fre','Lør'];
+const FULL=['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'];
+
+const PLAN={
+  1:{title:'Bryst & skulder fokus',badges:[{t:'Push',c:'b-push'},{t:'Prioritert',c:'b-prio'}],cardio:true,
+    time:{total:'~55 min',pause:'2–3 min pause'},
+    ex:[
+      {n:'Benkpress flat (stang)',s:'4 × 4–6',rpe:9,pause:'3 min',p:true},
+      {n:'Incline hantelpress',s:'3 × 8–10',rpe:8,pause:'2 min',p:true},
+      {n:'Skulderpress (hantler)',s:'3 × 8–10',rpe:8,pause:'2 min',p:true},
+      {n:'Lateral raises',s:'4 × 12–15',rpe:8,pause:'90 sek',p:true},
+      {n:'Triceps cable pushdown',s:'3 × 12–15',rpe:7,pause:'60 sek',p:false}
+    ]},
+  2:{title:'Rygg & biceps',badges:[{t:'Pull',c:'b-pull'}],cardio:false,
+    time:{total:'~58 min',pause:'2 min pause'},
+    ex:[
+      {n:'Chins / Lat pulldown',s:'4 × 5–7',rpe:9,pause:'3 min',p:false},
+      {n:'Pendlay rows',s:'4 × 6–8',rpe:8,pause:'2 min',p:false},
+      {n:'EZ-bar bicep curls',s:'4 × 8–10',rpe:8,pause:'90 sek',p:true},
+      {n:'Hammer curls',s:'3 × 10–12',rpe:7,pause:'60 sek',p:true},
+      {n:'Face pulls',s:'3 × 15–20',rpe:7,pause:'60 sek',p:false},
+      {n:'Lateral raises (finisher)',s:'3 × 15',rpe:8,pause:'60 sek',p:true}
+    ]},
+  3:{title:'Quads fokus',badges:[{t:'Legs',c:'b-legs'},{t:'Prioritert',c:'b-prio'}],cardio:true,
+    time:{total:'~60 min',pause:'2–3 min pause'},
+    ex:[
+      {n:'Knebøy high bar',s:'5 × 4–6',rpe:9,pause:'3 min',p:true},
+      {n:'Leg press',s:'4 × 10–12',rpe:8,pause:'2 min',p:true},
+      {n:'Leg extension',s:'3 × 12–15',rpe:8,pause:'90 sek',p:true},
+      {n:'Romanian deadlift',s:'3 × 10–12',rpe:8,pause:'2 min',p:false},
+      {n:'Standing calf raises',s:'4 × 15–20',rpe:7,pause:'60 sek',p:false}
+    ]},
+  4:{title:'Bryst & triceps volum',badges:[{t:'Push',c:'b-push'},{t:'Prioritert',c:'b-prio'}],cardio:false,
+    time:{total:'~55 min',pause:'90 sek–2 min'},
+    ex:[
+      {n:'Incline benkpress (stang)',s:'4 × 6–8',rpe:8,pause:'2 min',p:true},
+      {n:'Kabel-flies / Pec deck',s:'4 × 12–15',rpe:8,pause:'90 sek',p:true},
+      {n:'Arnold press',s:'3 × 10–12',rpe:8,pause:'90 sek',p:true},
+      {n:'Lateral raises (kabel)',s:'4 × 15',rpe:8,pause:'60 sek',p:true},
+      {n:'Skull crushers',s:'3 × 10–12',rpe:8,pause:'90 sek',p:false}
+    ]},
+  5:{title:'Rygg & biceps volum',badges:[{t:'Pull',c:'b-pull'}],cardio:true,
+    time:{total:'~58 min',pause:'90 sek–2 min'},
+    ex:[
+      {n:'Deadlift',s:'3 × 3–5',rpe:9,pause:'3 min',p:false},
+      {n:'Wide-grip lat pulldown',s:'3 × 10–12',rpe:8,pause:'90 sek',p:false},
+      {n:'Single-arm dumbbell row',s:'3 × 10–12',rpe:8,pause:'90 sek',p:false},
+      {n:'Incline dumbbell curls',s:'3 × 10–12',rpe:8,pause:'90 sek',p:true},
+      {n:'Face pulls',s:'3 × 15–20',rpe:7,pause:'60 sek',p:false},
+      {n:'Lateral raises (finisher)',s:'3 × 15',rpe:8,pause:'60 sek',p:true}
+    ]},
+  6:{title:'Posterior chain & glutes',badges:[{t:'Legs',c:'b-legs'}],cardio:false,
+    time:{total:'~55 min',pause:'2 min pause'},
+    ex:[
+      {n:'Hack squat / Sumo deadlift',s:'4 × 6–8',rpe:8,pause:'2 min',p:false},
+      {n:'Bulgarian split squat',s:'3 × 8–10/side',rpe:8,pause:'2 min',p:false},
+      {n:'Nordic curl / Leg curl',s:'4 × 8–10',rpe:8,pause:'90 sek',p:false},
+      {n:'Hip thrust',s:'3 × 10–12',rpe:8,pause:'90 sek',p:false},
+      {n:'Seated calf raises',s:'4 × 15–20',rpe:7,pause:'60 sek',p:false}
+    ]},
+  0:{title:'Aktiv hvile – cardio',badges:[{t:'Cardio',c:'b-cardio'},{t:'Hviledag',c:'b-rest'}],cardio:false,
+    time:{total:'30–45 min',pause:''},
+    ex:[
+      {n:'Løping, moderat tempo (sone 2)',s:'30–45 min',rpe:6,pause:'',p:false},
+      {n:'Alternativt: sykkel / svømming',s:'30–45 min',rpe:6,pause:'',p:false}
+    ]}
+};
+
+const TIPS=[
+  {i:'💪',t:'Progressiv overbelastning',b:'Øk vekt eller reps hver uke. Selv 0.5 kg mer er fremgang. Uten dette stopper veksten – uansett hvor hardt du trener.'},
+  {i:'🎯',t:'RPE er din beste venn',b:'RPE 8 betyr 2 reps igjen i tanken. Ikke gå til failure hver sett – det ødelegger restitusjon og teknikk. Hold deg til anbefalt RPE.'},
+  {i:'😴',t:'Søvn er trening',b:'Muskler vokser mens du sover, ikke på gymmen. 7–8 timer er minimumet. Dårlig søvn = dårlig restitusjon.'},
+  {i:'🥩',t:'Protein er alfa og omega',b:'180g protein per dag. Fordel det på 4–5 måltider. Uten nok protein bygger du ikke muskler uansett hvor hardt du trener.'},
+  {i:'📷',t:'Ta bilder, ikke bare vekten',b:'Vekten kan stå stille mens kroppen endrer seg. Bilder annenhver uke, samme lys og pose, viser den ekte fremgangen.'},
+  {i:'🔄',t:'Deload redder fremgangen',b:'Etter 6–8 uker: en uke med halvt volum. Det er her kroppen adapterer og blir sterkere. Ikke hopp over.'},
+  {i:'⏱',t:'Pauser er ikke slacking',b:'Anbefalte pausetider i planen er ikke tilfeldige. For korte pauser = dårligere sett = dårligere fremgang. Respekter pausene.'}
+];
+
+let cardioOn=false,tipIdx=0,selectedWeekDay=1,chartInst=null;
+
+function getData(){try{return JSON.parse(localStorage.getItem('treningsdata2')||'{}')}catch(e){return {};}}
+function saveData(d){localStorage.setItem('treningsdata2',JSON.stringify(d));}
+
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  const tabs={today:0,week:1,graph:2,kosthold:3,tips:4};
+  document.querySelectorAll('.nav-tab')[tabs[p]].classList.add('active');
+  if(p==='graph')initGraph();
+  if(p==='week')renderWeekPage();
+}
+
+function rpeClass(rpe){if(rpe<=7)return 'rpe-7';if(rpe===8)return 'rpe-8';return 'rpe-9';}
+
+function init(){
+  const now=new Date(),h=now.getHours(),day=now.getDay();
+  document.getElementById('greeting').textContent=h<10?'God morgen!':h<14?'God formiddag!':'Hei!';
+  document.getElementById('datechip').textContent=now.toLocaleDateString('nb-NO',{weekday:'long',day:'numeric',month:'long'}).replace(/^\w/,c=>c.toUpperCase());
+  const data=getData();
+  const wr=document.getElementById('weekrow');wr.innerHTML='';
+  for(let i=1;i<=7;i++){
+    const d=i%7,isT=d===day,isDone=data.weekDone&&data.weekDone[d];
+    const lbl={1:'P',2:'Pu',3:'B',4:'P',5:'Pu',6:'B',0:'C'};
+    const div=document.createElement('div');div.className='week-day';
+    div.innerHTML=`<div class="wd-label">${DAYS[d]}</div><div class="wd-dot${isT?' today':''}${isDone?' done':''}" onclick="markDay(${d})">${isDone?'✓':lbl[d]}</div>`;
+    wr.appendChild(div);
+  }
+  renderDayPlan(day,true);
+  const plan=PLAN[day];
+  document.getElementById('ev-sub').textContent=plan.cardio?'Anbefalt i dag (sone 2, 25–35 min)':'Hvil – ikke anbefalt i dag';
+  renderTips();
+}
+
+function renderDayPlan(day,interactive,containerId){
+  const plan=PLAN[day];
+  const data=getData();
+  const todayKey=new Date().toISOString().slice(0,10);
+
+  if(interactive){
+    document.getElementById('today-title').textContent=plan.title;
+    document.getElementById('today-sub').textContent=FULL[day]+' · 5 min oppvarming + '+plan.ex.length+' øvelser';
+    document.getElementById('badges').innerHTML=plan.badges.map(b=>`<span class="badge ${b.c}">${b.t}</span>`).join('');
+    document.getElementById('time-total').textContent=plan.time.total;
+    document.getElementById('time-pause').textContent=plan.time.pause;
+  }
+
+  const listId=interactive?'ex-list':(containerId||'week-ex-list');
+  const el=document.getElementById(listId);if(!el)return;
+  el.innerHTML='';
+
+  plan.ex.forEach((ex,i)=>{
+    const key='log_'+ex.n;
+    const logs=(data[key]||[]);
+    const todayLog=logs.find(l=>l.date===todayKey);
+    const lastOther=logs.filter(l=>l.date!==todayKey).slice(-1)[0];
+    const isDone=interactive?(data.checked&&data.checked[todayKey]&&data.checked[todayKey][i]):false;
+
+    let prevStr='';
+    if(todayLog)prevStr=`<div class="prev-log today-log">✓ I dag: ${todayLog.weight}kg × ${todayLog.reps} reps</div>`;
+    else if(lastOther)prevStr=`<div class="prev-log">Sist: ${lastOther.weight}kg × ${lastOther.reps} reps</div>`;
+
+    const pauseStr=ex.pause?`<span class="pause-badge">⏸ ${ex.pause}</span>`:'';
+
+    const row=document.createElement('div');row.className='ex-row';
+    row.innerHTML=`
+      <div class="ex-main">
+        <div class="ex-left">
+          ${ex.p?'<span class="prio-dot"></span>':'<span class="no-dot"></span>'}
+          <div class="ex-info">
+            <div class="ex-name">${ex.n}</div>
+            <div class="ex-meta">
+              <span class="ex-sets">${ex.s}</span>
+              <span class="rpe-badge ${rpeClass(ex.rpe)}">RPE ${ex.rpe}</span>
+              ${pauseStr}
+            </div>
+            ${prevStr}
+          </div>
+        </div>
+        ${interactive?`<div class="ex-actions">
+          <button class="log-btn" onclick="toggleLog('lp-${i}')">+ Logg</button>
+          <button class="chk${isDone?' done':''}" id="cb-${i}" onclick="toggleCheck(${i})">${isDone?'✓':''}</button>
+        </div>`:''}
+      </div>
+      ${interactive?`<div class="log-panel" id="lp-${i}">
+        <div class="log-row"><span class="log-set-num">Vekt (kg)</span><input class="log-input" type="number" id="w-${i}" placeholder="f.eks. 80" inputmode="decimal"><span class="log-label">kg</span></div>
+        <div class="log-row"><span class="log-set-num">Reps</span><input class="log-input" type="number" id="r-${i}" placeholder="f.eks. 6" inputmode="numeric"><span class="log-label">reps</span></div>
+        <button class="log-save-btn" onclick="saveLog(${i},'${ex.n.replace(/'/g,"\\'")}')">Lagre</button>
+      </div>`:''}`;
+    el.appendChild(row);
+  });
+  if(interactive)updateProg(plan.ex.length);
+}
+
+function toggleLog(id){const el=document.getElementById(id);if(el)el.classList.toggle('open');}
+
+function saveLog(i,exName){
+  const w=document.getElementById('w-'+i).value;
+  const r=document.getElementById('r-'+i).value;
+  if(!w||!r)return;
+  const data=getData();
+  const key='log_'+exName;
+  if(!data[key])data[key]=[];
+  const today=new Date().toISOString().slice(0,10);
+  data[key]=data[key].filter(l=>l.date!==today);
+  data[key].push({date:today,weight:parseFloat(w),reps:parseInt(r)});
+  if(data[key].length>60)data[key]=data[key].slice(-60);
+  saveData(data);
+  document.getElementById('lp-'+i).classList.remove('open');
+  renderDayPlan(new Date().getDay(),true);
+}
+
+function toggleCheck(i){
+  const data=getData();
+  const today=new Date().toISOString().slice(0,10);
+  if(!data.checked)data.checked={};
+  if(!data.checked[today])data.checked[today]={};
+  data.checked[today][i]=!data.checked[today][i];
+  saveData(data);
+  renderDayPlan(new Date().getDay(),true);
+}
+
+function updateProg(total){
+  const data=getData();
+  const today=new Date().toISOString().slice(0,10);
+  const done=data.checked&&data.checked[today]?Object.values(data.checked[today]).filter(Boolean).length:0;
+  const pct=total>0?Math.round(done/total*100):0;
+  const pt=document.getElementById('prog-text');if(pt)pt.textContent=done+' / '+total;
+  const pf=document.getElementById('prog-fill');if(pf)pf.style.width=pct+'%';
+}
+
+function toggleCardio(){cardioOn=!cardioOn;document.getElementById('cardio-toggle').classList.toggle('on',cardioOn);}
+
+function markDay(d){
+  const data=getData();
+  if(!data.weekDone)data.weekDone={};
+  data.weekDone[d]=!data.weekDone[d];
+  saveData(data);
+function toggleMeal(id){
+  const det=document.getElementById(id);
+  const arr=document.getElementById('arr-'+id);
+  det.classList.toggle('open');
+  arr.classList.toggle('open');
+}
+init();
+}
+
+function renderWeekPage(){
+  selectedWeekDay=selectedWeekDay||1;
+  const row=document.getElementById('day-select-row');row.innerHTML='';
+  for(let i=1;i<=7;i++){
+    const d=i%7;
+    const btn=document.createElement('button');
+    btn.className='day-sel-btn'+(d===selectedWeekDay?' active':'');
+    btn.textContent=DAYS[d];
+    btn.onclick=()=>{selectedWeekDay=d;renderWeekPage();};
+    row.appendChild(btn);
+  }
+  document.getElementById('week-day-label').textContent=FULL[selectedWeekDay];
+  const plan=PLAN[selectedWeekDay];
+  const card=document.getElementById('week-day-card');
+  card.innerHTML=`
+    <div class="today-top">
+      <div class="badges">${plan.badges.map(b=>`<span class="badge ${b.c}">${b.t}</span>`).join('')}</div>
+      <div class="today-title">${plan.title}</div>
+      <div class="today-sub">${plan.ex.length} øvelser</div>
+    </div>
+    <div class="time-bar">
+      <div class="time-item"><span class="time-icon">⏱</span><span>${plan.time.total}</span></div>
+      <div class="time-item"><span class="time-icon">💤</span><span>${plan.time.pause}</span></div>
+    </div>
+    <div id="week-ex-list"></div>`;
+  renderDayPlan(selectedWeekDay,false,'week-ex-list');
+}
+
+function initGraph(){
+  const allEx=[];
+  Object.values(PLAN).forEach(p=>p.ex.forEach(e=>{if(!allEx.includes(e.n))allEx.push(e.n);}));
+  const sel=document.getElementById('graph-ex-select');
+  const cur=sel.value;
+  sel.innerHTML=allEx.map(n=>`<option value="${n}"${n===cur?' selected':''}>${n}</option>`).join('');
+  renderGraph();
+}
+
+function renderGraph(){
+  const data=getData();
+  const ex=document.getElementById('graph-ex-select').value;
+  const logs=(data['log_'+ex]||[]).slice(-12);
+  const histEl=document.getElementById('log-history');
+  if(!logs.length){
+    if(chartInst){chartInst.destroy();chartInst=null;}
+    document.getElementById('myChart').style.display='none';
+    histEl.innerHTML='<div class="graph-empty">Ingen logger enda.<br>Logg vekt under «I dag».</div>';
+    return;
+  }
+  document.getElementById('myChart').style.display='block';
+  const labels=logs.map(l=>l.date.slice(5));
+  const weights=logs.map(l=>l.weight);
+  if(chartInst)chartInst.destroy();
+  const ctx=document.getElementById('myChart').getContext('2d');
+  chartInst=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[{label:'kg',data:weights,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',tension:0.3,pointBackgroundColor:'#1D9E75',pointRadius:5,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y} kg`}}},scales:{y:{beginAtZero:false,ticks:{font:{size:11}}},x:{ticks:{font:{size:11}}}}}
+  });
+  histEl.innerHTML='<div style="font-size:12px;color:#999;margin-bottom:6px;">Logghistorikk</div>'+
+    logs.slice().reverse().slice(0,6).map(l=>`<div class="log-hist-row"><span class="log-hist-date">${l.date.slice(5)}</span><span>${l.weight} kg × ${l.reps} reps</span></div>`).join('');
+}
+
+function renderTips(){
+  const t=TIPS[tipIdx];
+  const ti=document.getElementById('tip-icon');if(ti)ti.textContent=t.i;
+  const tt=document.getElementById('tip-title');if(tt)tt.textContent=t.t;
+  const tb=document.getElementById('tip-body');if(tb)tb.textContent=t.b;
+  const td=document.getElementById('tip-dots');if(td)td.innerHTML=TIPS.map((_,i)=>`<div class="tip-dot${i===tipIdx?' active':''}"></div>`).join('');
+}
+function nextTip(){tipIdx=(tipIdx+1)%TIPS.length;renderTips();}
+function prevTip(){tipIdx=(tipIdx-1+TIPS.length)%TIPS.length;renderTips();}
+
+
+function toggleMeal(id){
+  const det=document.getElementById(id);
+  const arr=document.getElementById('arr-'+id);
+  det.classList.toggle('open');
+  arr.classList.toggle('open');
+}
+init();
+</script>
+</body>
+</html>
+<!-- KOSTHOLD SECTION INJECTED -->
